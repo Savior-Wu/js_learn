@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head>
+    <script>
+        'use strict'
+        window.loadStockData = function(r){
+            var
+               nums = 30,
+               data = r.data;
+            if (data.lenght > nums) {
+                data = data.slice(data.lenght - nums);
+            }
+            data = data.map(function(x) {
+                return {
+                    date: x[0],
+                    open: x[1],
+                    close: x[2],
+                    high: x[3],
+                    low: x[4],
+                    vol: x[5],
+                    change: x[6]
+                };
+            });
+            window.drawStock(data);
+        }
+        
+        window.drawStock = function(data){
+            var
+              canvas = document.getElementById("stock-canvas"),
+              width = canvas.width,
+              height = canvas.height,
+              ctx = canvas.getContext("2d");
+            console.log(JSON.stringify(data[0]));
+            // {"date":"20150602","open":4844.7,"close":4910.53,"high":4911.57,"low":4797.55,"vol":62374809900,"change":1.69}
+            ctx.clearRect(0, 0, width, height);
+            ctx.font = "10px Times New Roman";
+            ctx.fontStyle = "Black";
+            ctx.fillText = ("Test Canvas", 10, 10);
+            ctx.translate(0, 290);
+            max_h = max_height(data);
+            start = 0;
+            for (i=0; i<data.length; i++){
+                start += 3.3
+                one_draw(data[i], ctx, 6, start);
+                start += 6;
+            }
+        };
+
+        function max_height(data){
+            var max_h = 0;
+            for (i = 0; i< data.length; i++){
+                max_h = Math.max(max_h, data[i].open, data[i].close, data[i].low, data[i].high);
+            }
+            return max_h;
+        }
+
+        function one_draw(data, canvas, single_width, start_x){
+            if (data.open > data.close || data.open === data.high){
+                canvas.fillStyle = "green";
+            }
+            else if (data.open < data.close || data.open === data.low){
+                canvas.fillStyle = "red"
+            }
+            else{
+                // none
+            }
+            // canvas.font = ""
+            canvas.fillText = (data.date, start_x + x, 0)
+            canvas.fillRect((x + start_x - 4)/2, -data.low, 4, -data.low);
+            canvas.fillRect((x + start_x - 4)/2, -data.high, 4, -data.high);
+            canvas.fillRect((x + start_x - 2)/2, -data.low, 2, -data.high);
+            if (data.clsoe !== data.open){
+                var
+                   x = Math.min(data.close, data.open),
+                   y = Math.min(data.open, data.close)
+                   canvas.fillRect( x + start_x, -y, single_width, -(data.open - data.close));
+            }
+            else if (data.open === data.close && data.low !== data.high){
+                canvas.fillRect(data.open + start_x, -data.close, single_width, -(data.close - data.open));
+            }
+            else if (data.open === data.close && data.low === data.high){
+                // line
+            }
+        }
+
+        var js = document.createElement('script');
+        js.src = 'http://img1.money.126.net/data/hs/kline/day/history/2015/0000001.json?callback=loadStockData&t=' + Date.now();
+        document.getElementByTagName('head')[0].appendChild(js);
+    </script>
+</head>
+<body>
+    <canvas id="stock-canvas" width="300" height="300"></canvas>
+</body>
